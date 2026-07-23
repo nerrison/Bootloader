@@ -1,0 +1,122 @@
+# project name
+TARGET = bootloader
+
+
+# toolchain
+CC      = arm-none-eabi-gcc
+AS      = arm-none-eabi-gcc
+OBJCOPY = arm-none-eabi-objcopy
+SIZE    = arm-none-eabi-size
+
+
+# MCU
+CPU   = -mcpu=cortex-m4
+THUMB = -mthumb
+
+
+# preprocessor definitions
+DEFINES = \
+-DSTM32F407xx \
+-DUSE_HAL_DRIVER
+
+
+# include directories
+INCLUDES = \
+-Iinc \
+-IDevice/Include \
+-IDrivers/CMSIS/Core/Include \
+-IDrivers/STM32F4xx_HAL_Driver/Inc
+
+
+# compiler flags
+CFLAGS = $(CPU)
+CFLAGS += $(THUMB)
+CFLAGS += -O0
+CFLAGS += -g
+CFLAGS += -Wall
+CFLAGS += $(DEFINES)
+CFLAGS += $(INCLUDES)
+
+
+# source files
+SRCS = \
+src/main.c \
+src/jump.c \
+Device/Source/system_stm32f4xx.c \
+Device/Source/startup_stm32f407xx.s \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+
+
+# build directory
+OBJ_DIR = build
+
+
+# object files
+OBJS = $(SRCS:%=$(OBJ_DIR)/%.o)
+
+
+# linker script
+LDSCRIPT = Linker/STM32F407VGTX_FLASH.ld
+
+
+# linker flags
+LDFLAGS = $(CPU)
+LDFLAGS += $(THUMB)
+LDFLAGS += -T$(LDSCRIPT)
+LDFLAGS += -Wl,--gc-sections
+
+
+# output files
+ELF = $(OBJ_DIR)/$(TARGET).elf
+BIN = $(OBJ_DIR)/$(TARGET).bin
+HEX = $(OBJ_DIR)/$(TARGET).hex
+
+
+# default
+all: $(ELF) $(BIN) $(HEX)
+
+
+# create build directories
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
+
+
+# compile C files
+$(OBJ_DIR)/%.c.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+
+# compile assembly
+$(OBJ_DIR)/%.s.o: %.s
+	mkdir -p $(dir $@)
+	$(AS) $(CFLAGS) -c $< -o $@
+
+
+# link
+$(ELF): $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o $@
+	$(SIZE) $@
+
+
+# binary
+$(BIN): $(ELF)
+	$(OBJCOPY) -O binary $< $@
+
+
+# hex
+$(HEX): $(ELF)
+	$(OBJCOPY) -O ihex $< $@
+
+
+# clean
+clean:
+	rm -rf $(OBJ_DIR)
+
+
+.PHONY: all clean

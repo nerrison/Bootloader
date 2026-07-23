@@ -1,0 +1,7 @@
+#ifndef MEMORY_MAP_H
+#define MEMORY_MAP_H
+
+#define BOOTLOADER_ADDRESS     0x08000000U
+#define APPLICATION_ADDRESS    0x08008000U
+
+#endif
