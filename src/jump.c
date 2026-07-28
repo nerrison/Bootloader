@@ -5,13 +5,6 @@
 
 typedef void (*pFunction)(void);
 
-uint8_t Application_IsValid(void)
-{
-    uint32_t stack = *(volatile uint32_t *)APPLICATION_ADDRESS;
-
-    return ((stack >= 0x20000000U) &&
-            (stack <= 0x20020000U));
-}
 
 void JUMP_TO_Program(void)
 {

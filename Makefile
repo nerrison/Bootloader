@@ -15,9 +15,7 @@ THUMB = -mthumb
 
 
 # preprocessor definitions
-DEFINES = \
--DSTM32F407xx \
--DUSE_HAL_DRIVER
+DEFINES = -DSTM32F407xx 
 
 
 # include directories
@@ -25,7 +23,6 @@ INCLUDES = \
 -Iinc \
 -IDevice/Include \
 -IDrivers/CMSIS/Core/Include \
--IDrivers/STM32F4xx_HAL_Driver/Inc
 
 
 # compiler flags
@@ -40,16 +37,10 @@ CFLAGS += $(INCLUDES)
 
 # source files
 SRCS = \
-src/main.c \
-src/jump.c \
+$(wildcard src/*.c) \
 Device/Source/system_stm32f4xx.c \
 Device/Source/startup_stm32f407xx.s \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c
+
 
 
 # build directory
@@ -69,6 +60,7 @@ LDFLAGS = $(CPU)
 LDFLAGS += $(THUMB)
 LDFLAGS += -T$(LDSCRIPT)
 LDFLAGS += -Wl,--gc-sections
+LDFLAGS += -Wl,-Map=$(OBJ_DIR)/$(TARGET).map
 
 
 # output files

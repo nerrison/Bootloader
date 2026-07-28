@@ -1,7 +1,12 @@
 #ifndef MEMORY_MAP_H
 #define MEMORY_MAP_H
 
+/* Program Addresses */
 #define BOOTLOADER_ADDRESS     0x08000000U
 #define APPLICATION_ADDRESS    0x08008000U
 
-#endif
+/*  STM32F407 SRAM */
+#define SRAM_START 0x20000000U
+#define SRAM_END   0x20020000U
+
+#endif /* MEMORY_MAP_H */

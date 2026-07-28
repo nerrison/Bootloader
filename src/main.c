@@ -1,18 +1,24 @@
-#include "stm32f4xx_hal.h"
+#include "stm32f4xx.h"
 
 #include "jump.h"
-
+#include "verify.h"
 
 
 int main(void)
 {
-    HAL_Init();
-
-
+    
+//    if(Update_Requet){
+//        RX_Init();
+//        Rx_Start();
+//        Flash_Init();
+//        Flash_Erase_App();
+//    }
+  
     if (Application_IsValid())
     {
         JUMP_TO_Program();
     }
+
 
     /*
      * No application found.
@@ -21,8 +27,6 @@ int main(void)
 
     while (1)
     {
-        /* Bootloader code */
-
-        HAL_Delay(500);
+        
     }
 }
