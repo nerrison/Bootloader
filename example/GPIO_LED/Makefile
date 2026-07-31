@@ -1,5 +1,5 @@
 # project name
-TARGET = bootloader
+TARGET = led
 
 
 # toolchain
@@ -20,7 +20,6 @@ DEFINES = -DSTM32F407xx
 
 # include directories
 INCLUDES = \
--Iinc \
 -IDevice/Include \
 -IDrivers/CMSIS/Core/Include \
 

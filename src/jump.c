@@ -6,10 +6,10 @@
 typedef void (*pFunction)(void);
 
 
-void JUMP_TO_Program(void)
+void JumpToProgram(void)
 {
-    uint32_t appStack = *(uint32_t *)APPLICATION_ADDRESS;
-    uint32_t appEntry = *(uint32_t *)(APPLICATION_ADDRESS + 4);
+    uint32_t programStack = *(uint32_t *)PROGRAM_ADDRESS;
+    uint32_t programEntry = *(uint32_t *)(PROGRAM_ADDRESS + 4);
 
     /* Disable interrupts */
     __disable_irq();
@@ -27,13 +27,13 @@ void JUMP_TO_Program(void)
     }
 
     /* Change vector table */
-    SCB->VTOR = APPLICATION_ADDRESS;
+    SCB->VTOR = PROGRAM_ADDRESS;
     __DSB();
     __ISB();
 
-    /* Set application's stack pointer */
-    __set_MSP(appStack);
+    /* Set PROGRAM's stack pointer */
+    __set_MSP(programStack);
 
-    /* Jump to application's Reset_Handler */
-    ((pFunction)appEntry)();
+    /* Jump to PROGRAM's Reset_Handler */
+    ((pFunction)programEntry)();
 }

@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-void JUMP_TO_Program(void);
-uint8_t Application_IsValid(void);
+void JumpToProgram(void);
 
 #endif

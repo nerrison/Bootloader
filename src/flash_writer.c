@@ -4,9 +4,9 @@
 #include "memory_map.h"
 
 
+static uint32_t address = PROGRAM_ADDRESS;
 
-
-static void Flash_Unlock(void)
+static void FlashUnlock(void)
 {
     if(FLASH->CR & FLASH_CR_LOCK)
     {
@@ -16,15 +16,15 @@ static void Flash_Unlock(void)
 }
 
 
-void Flash_Lock(void)
+void FlashLock(void)
 {
     FLASH->CR |= FLASH_CR_LOCK;
 }
 
 
-void Flash_Init(void)
+void FlashInit(void)
 {
-    Flash_Unlock();
+    FlashUnlock();
 
     FLASH->ACR |= FLASH_ACR_PRFTEN;
     FLASH->ACR |= FLASH_ACR_ICEN;
@@ -32,17 +32,17 @@ void Flash_Init(void)
 }
 
 
-static void Flash_Wait_Busy(void)
+static void FlashWaitBusy(void)
 {
     while(FLASH->SR & FLASH_SR_BSY);
 }
 
 
-void Flash_Erase_App(void)
+void FlashEraseProgram(void)
 {
-    Flash_Unlock();
+    FlashUnlock();
 
-    Flash_Wait_Busy();
+    FlashWaitBusy();
 
 
     FLASH->CR &= ~FLASH_CR_SNB;
@@ -55,18 +55,18 @@ void Flash_Erase_App(void)
     FLASH->CR |= FLASH_CR_STRT;
 
 
-    Flash_Wait_Busy();
+    FlashWaitBusy();
 
 
     FLASH->CR &= ~FLASH_CR_SER;
+
+    address = PROGRAM_ADDRESS;
 }
 
 
-static uint32_t address = APPLICATION_ADDRESS;
-
-void Flash_Write(uint8_t *data, uint16_t length)
+uint8_t FlashWrite(uint8_t *data, uint16_t length)
 {
-    Flash_Unlock();
+    FlashUnlock();
 
     for(uint16_t i = 0; i < length; i += 4)
     {
@@ -85,7 +85,7 @@ void Flash_Write(uint8_t *data, uint16_t length)
             word |= data[i+3] << 24;
 
 
-        Flash_Wait_Busy();
+        FlashWaitBusy();
 
         FLASH->CR &= ~FLASH_CR_PSIZE;
         FLASH->CR |= FLASH_CR_PSIZE_1;   // 32-bit programming
@@ -94,10 +94,21 @@ void Flash_Write(uint8_t *data, uint16_t length)
 
         *(__IO uint32_t*)address = word;
 
-        Flash_Wait_Busy();
+        FlashWaitBusy();
+
+        if(FLASH->SR & (FLASH_SR_WRPERR |
+                FLASH_SR_PGAERR |
+                FLASH_SR_PGPERR |
+                FLASH_SR_PGSERR))
+        {
+            return 0;
+        }
 
         FLASH->CR &= ~FLASH_CR_PG;
 
         address += 4;
+
     }
+
+    return 0;
 }

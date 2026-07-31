@@ -1,12 +1,13 @@
 #include "stm32f4xx.h"
-#include "receive_uart.h"
+#include "usart1.h"
 
-#define UART_BAUD 115200
+#define UART_BAUD 0x008B
+#define RX_BUFFER_SIZE 256U
 
 uint8_t rx_Buffer[RX_BUFFER_SIZE];
 
 
-static void UART_Clock_Enable(void)
+static void USART1_Clock_Enable(void)
 {
     /* GPIOA and USART1 CLOCK*/
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -18,7 +19,7 @@ static void DMA_Clock_Enable(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
 }
 
-static void UART_GPIO_Init(void)
+static void USART1_GPIO_Init(void)
 {
     /* Alternate Function */
     GPIOA->MODER &= ~((3U << (9 * 2)) | (3U << (10 * 2)));
@@ -90,7 +91,7 @@ static void DMA_Config(void)
 }
 
 
-static void UART_Config(void)
+static void USART1_Config(void)
 {
     USART1->CR1 = 0;
 
@@ -99,38 +100,53 @@ static void UART_Config(void)
     USART1->CR1 |= USART_CR1_TE;
     USART1->CR1 |= USART_CR1_RE;
 
-    /* Enable DMA receiver */
-    USART1->CR3 |= USART_CR3_DMAR;
-
-    /* Enable USART IDLE interrupt */
-    USART1->CR1 |= USART_CR1_IDLEIE;
-
-    /* Enable USART1 interrupt in NVIC */
-    NVIC_EnableIRQ(USART1_IRQn);
-
     USART1->CR1 |= USART_CR1_UE;
 }
 
 
 
-void RX_Init(void)
+void USART1_Init(void)
 {
-    UART_Clock_Enable();
-    DMA_Clock_Enable();
+    USART1_Clock_Enable();
 
-    UART_GPIO_Init();
-    DMA_Config();
-    UART_Config();
+    USART1_GPIO_Init();
+
+    USART1_Config();
 }
 
 
-void RX_Start(void)
+void USART1_SendChar(char c)
 {
-    DMA2_Stream2->CR &= ~DMA_SxCR_EN;
-    while (DMA2_Stream2->CR & DMA_SxCR_EN);
+    while(!(USART1->SR & USART_SR_TXE));
 
-    DMA2_Stream2->M0AR = (uint32_t)rx_Buffer;
-    DMA2_Stream2->NDTR = RX_BUFFER_SIZE;
+    USART1->DR = c;
+}
+
+
+void USART1_SendString(const char *str)
+{
+    while(*str)
+    {
+        USART1_SendChar(*str);
+        str++;
+    }
+
+    while(!(USART1->SR & USART_SR_TC));
+}
+
+
+
+void USART1_RX_Start(void)
+{
+    DMA_Clock_Enable();
+
+    DMA_Config();
+    
+    USART1->CR3 |= USART_CR3_DMAR;
+
+    USART1->CR1 |= USART_CR1_IDLEIE;
+
+    NVIC_EnableIRQ(USART1_IRQn);
 
     DMA2_Stream2->CR |= DMA_SxCR_EN;
 }

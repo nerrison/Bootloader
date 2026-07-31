@@ -3,12 +3,12 @@
 
 #include "stdint.h"
 
-void Flash_Init(void);
+void FlashInit(void);
 
-void Flash_Erase_App(void);
+void FlashEraseProgram(void);
 
-void Flash_Write( uint8_t *data, uint16_t length);
+uint8_t FlashWrite( uint8_t *data, uint16_t length);
 
-void Flash_Lock(void);
+void FlashLock(void);
 
 #endif

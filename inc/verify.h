@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
-uint8_t Application_IsValid(void);
+uint8_t ProgramIsValid(void);
+uint8_t CRC_Check_OK(void);
 
 #endif
