@@ -2,8 +2,9 @@ using sysbus
 
 include @scripts/single-node/stm32f4_discovery.resc
 
-sysbus LoadELF @Bootloader/build/bootloader.elf
+sysbus LoadELF @build/bootloader.elf
 
+sysbus LoadELF @example/GPIO_LED/build/led.elf
 
 showAnalyzer sysbus.usart1
 
